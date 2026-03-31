@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="org.apache.cordova.hellocordova" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>星屿合成(进阶)</name>
+    <description>
+        星屿合成·治愈太空。轻触星云，合成宇宙，在无尽星空中找到宁静
+    </description>
+    <author email="1614476153@qq.com" href="https://www.ygh.com">
+        YGH
+    </author>
+    <content src="index.html" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <platform name="android">
+      <icon src="resources/android/icon.png" density="mdpi"/>
+    </platform>
+    <preference name="Fullscreen" value="true" />
+    <preference name="StatusBarOverlaysWebView" value="false" />
+    <preference name="Orientation" value="portrait" />
+</widget>
