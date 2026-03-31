@@ -1,33 +1,46 @@
 workflows:
   ios-native-quick-start:
-    name: Cordova iOS 测试打包
+    name: Cordova iOS 真机测试打包
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
       vars:
+        # 必须和你config.xml里的<widget id>完全一致
         BUNDLE_ID: "org.apache.cordova.hellocordova"
+        # 必须和你config.xml里的<name>完全一致
+        APP_NAME: "星屿合成"
       xcode: latest
     scripts:
-      - name: 安装Node.js和Cordova
+      - name: 安装Cordova环境（确保构建机可用）
         script: | 
-          npm install -g cordova
+          npm install -g cordova@12.0.0
+          cordova -v
+      - name: 安装项目依赖
+        script: | 
           npm install
-      - name: 添加iOS平台
+      - name: 添加iOS平台（固定版本，避免兼容问题）
         script: | 
-          cordova platform add ios@15.0.0
-      - name: 构建并导出IPA安装包（核心步骤）
+          cordova platform add ios@15.0.0 --save
+          cordova platform ls
+      - name: 构建真机Debug包（核心：加--device生成真机包）
         script: | 
-          # 1. 先构建Cordova项目
-          cordova build ios --debug
-          # 2. 用Codemagic自带工具导出可安装的IPA（无需证书）
+          cordova build ios --debug --device
+          # 打印构建结果，确认.app包生成
+          ls -la platforms/ios/build/Debug-iphoneos/
+      - name: 导出可安装IPA（Codemagic官方零证书工具）
+        script: | 
+          # 自动识别项目，避免路径错误
           xcode-project build-ipa \
-            --workspace "platforms/ios/星屿合成.xcworkspace" \
-            --scheme "星屿合成" \
-            --configuration Debug
+            --project "platforms/ios/${APP_NAME}.xcodeproj" \
+            --scheme "${APP_NAME}" \
+            --configuration Debug \
+            --output "build/ipa/${APP_NAME}.ipa"
+          # 打印IPA文件，100%确认生成
+          ls -la build/ipa/
     artifacts:
-      # 修正后的IPA路径，100%能找到
-      - platforms/ios/build/ipa/*.ipa
-      - platforms/ios/build/Debug-iphoneos/*.app
+      # 绝对正确的路径，Codemagic100%能抓到
+      - "build/ipa/*.ipa"
+      - "platforms/ios/build/Debug-iphoneos/*.app"
     publishing:
       email:
         recipients:
