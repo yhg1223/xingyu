@@ -1,29 +1,29 @@
 workflows:
-  cordova-ios-build:
+  ios-native-quick-start:
     name: Cordova iOS 测试打包
     max_build_duration: 120
     instance_type: mac_mini_m2
-    # 移除所有 App Store 证书/签名配置
+    # 彻底移除所有苹果开发者账号/证书/App Store配置
     environment:
       vars:
-        # 改成你 Cordova 项目的包名（和 config.xml 一致）
+        # 你的Cordova项目包名（和config.xml完全一致）
         BUNDLE_ID: "org.apache.cordova.hellocordova"
       xcode: latest
-    # 核心：Cordova 打包脚本
+    # 专为你的HTML/Cordova项目编写的打包脚本
     scripts:
-      - name: 安装 Node.js 依赖
+      - name: 安装项目依赖
         script: | 
           npm install
-      - name: 添加 iOS 平台
+      - name: 添加iOS平台
         script: | 
           npx cordova platform add ios
-      - name: 构建 iOS 测试包 (无证书)
+      - name: 构建无证书测试IPA
         script: | 
           npx cordova build ios --debug
-    # 自动输出 IPA 安装包
+    # 自动打包输出安装包
     artifacts:
-      - platforms/android/app/build/outputs/apk/debug/*.apk
       - platforms/ios/build/device/*.ipa
+    # 打包完成发邮件通知你
     publishing:
       email:
         recipients:
