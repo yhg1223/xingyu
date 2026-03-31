@@ -3,30 +3,43 @@ workflows:
     name: Cordova iOS 真机IPA打包
     max_build_duration: 120
     instance_type: mac_mini_m2
+
     environment:
       xcode: latest
-      vars:
-        # 必须和你config.xml里的<name>完全一致！
-        APP_NAME: "星屿合成"
+
+      ios_signing:
+        distribution_type: development
+        bundle_identifier: com.xingyu.hecheng
+
     scripts:
-      - name: 安装Cordova
+      - name: 安装 Cordova
         script: npm install -g cordova
-      - name: 添加iOS平台
+
+      - name: 安装依赖
+        script: npm install
+
+      - name: 添加 iOS 平台
         script: cordova platform add ios
-      - name: 构建真机Debug包（核心：加--device生成真机包）
-        script: cordova build ios --debug --device
-      - name: 用Codemagic工具导出IPA（关键！把.app转成.ipa）
+
+      - name: 查看 iOS 项目结构（调试用）
+        script: ls -la platforms/ios
+
+      - name: 构建 iOS（真机）
+        script: cordova build ios --device
+
+      - name: 导出 IPA
         script: |
           xcode-project build-ipa \
-            --project "platforms/ios/${APP_NAME}.xcodeproj" \
-            --scheme "${APP_NAME}" \
-            --configuration Debug \
-            --output "build/ipa/${APP_NAME}.ipa"
-          # 验证IPA生成，方便排查
-          ls -la build/ipa/
+            --workspace "platforms/ios/App.xcworkspace" \
+            --scheme "App" \
+            --output "build/ipa/App.ipa"
+
+      - name: 查看 IPA
+        script: ls -la build/ipa/
+
     artifacts:
-      # 只抓取真机可用的IPA
-      - "build/ipa/*.ipa"
+      - build/ipa/*.ipa
+
     publishing:
       email:
         recipients:
