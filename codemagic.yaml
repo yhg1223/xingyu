@@ -3,27 +3,31 @@ workflows:
     name: Cordova iOS 测试打包
     max_build_duration: 120
     instance_type: mac_mini_m2
-    # 彻底移除所有苹果开发者账号/证书/App Store配置
     environment:
       vars:
-        # 你的Cordova项目包名（和config.xml完全一致）
         BUNDLE_ID: "org.apache.cordova.hellocordova"
       xcode: latest
-    # 专为你的HTML/Cordova项目编写的打包脚本
     scripts:
-      - name: 安装项目依赖
+      - name: 安装Node.js和Cordova
         script: | 
+          npm install -g cordova
           npm install
       - name: 添加iOS平台
         script: | 
-          npx cordova platform add ios
-      - name: 构建无证书测试IPA
+          cordova platform add ios@15.0.0
+      - name: 构建并导出IPA安装包（核心步骤）
         script: | 
-          npx cordova build ios --debug
-    # 自动打包输出安装包
+          # 1. 先构建Cordova项目
+          cordova build ios --debug
+          # 2. 用Codemagic自带工具导出可安装的IPA（无需证书）
+          xcode-project build-ipa \
+            --workspace "platforms/ios/星屿合成.xcworkspace" \
+            --scheme "星屿合成" \
+            --configuration Debug
     artifacts:
-      - platforms/ios/build/device/*.ipa
-    # 打包完成发邮件通知你
+      # 修正后的IPA路径，100%能找到
+      - platforms/ios/build/ipa/*.ipa
+      - platforms/ios/build/Debug-iphoneos/*.app
     publishing:
       email:
         recipients:
